@@ -40,6 +40,7 @@ MQTT_QOS = config.getint("global", "mqtt_qos")
 MQTT_RETAIN = config.getboolean("global", "mqtt_retain")
 MQTT_CLEAN_SESSION = config.getboolean("global", "mqtt_clean_session")
 MQTT_LWT = config.get("global", "mqtt_lwt")
+MQTT_CA_CERT_PATH = config.get("global", "mqtt_ca_cert_path")
 
 MONITOR_PINS = config.get("global", "monitor_pins")
 MONITOR_POLL = config.getfloat("global", "monitor_poll")
@@ -230,6 +231,12 @@ def connect():
     mqttc.on_connect = on_connect
     mqttc.on_disconnect = on_disconnect
     mqttc.on_message = on_message
+
+    #Set the TLS settings
+    if MQTT_CA_CERT_PATH:
+	import ssl
+        logging.debug("trying to log ca certificates from " + MQTT_CA_CERT_PATH)
+        mqttc.tls_set(ca_certs=MQTT_CA_CERT_PATH, tls_version=ssl.PROTOCOL_TLSv1_2)
 
     # Set the login details
     if MQTT_USERNAME:
