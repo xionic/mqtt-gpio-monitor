@@ -235,7 +235,7 @@ def connect():
     #Set the TLS settings
     if MQTT_CA_CERT_PATH:
 	import ssl
-        logging.debug("trying to log ca certificates from " + MQTT_CA_CERT_PATH)
+        logging.debug("trying to load ca certificates from " + MQTT_CA_CERT_PATH)
         mqttc.tls_set(ca_certs=MQTT_CA_CERT_PATH, tls_version=ssl.PROTOCOL_TLSv1_2)
 
     # Set the login details
