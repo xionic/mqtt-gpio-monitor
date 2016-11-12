@@ -245,13 +245,18 @@ def connect():
     # Set the Last Will and Testament (LWT) *before* connecting
     mqttc.will_set(MQTT_LWT, payload="0", qos=0, retain=True)
 
-    # Attempt to connect
-    logging.debug("Connecting to %s:%d..." % (MQTT_HOST, MQTT_PORT))
-    try:
-        mqttc.connect(MQTT_HOST, MQTT_PORT, 60)
-    except Exception, e:
-        logging.error("Error connecting to %s:%d: %s" % (MQTT_HOST, MQTT_PORT, str(e)))
-        sys.exit(2)
+    # Attempt to connect - for resilience try a few times if we fail to connect
+    attempt_num = 1
+    while True:
+        logging.debug("Connecting to %s:%d (attempt #%d)..." % (MQTT_HOST, MQTT_PORT, attempt_num))
+        try:
+           mqttc.connect(MQTT_HOST, MQTT_PORT, 60)
+        except Exception, e:
+            logging.error("Error connecting to %s:%d: %s" % (MQTT_HOST, MQTT_PORT, str(e)))
+            if attempt_num > 4:
+                sys.exit(2)
+            time.sleep(5)
+	break
 
     # Let the connection run forever
     mqttc.loop_start()
