@@ -10,6 +10,8 @@ MQTT_CLIENT_ID     = mqtt-gpio-monitor
 MQTT_QOS           = 2
 MQTT_RETAIN        = False
 MQTT_CLEAN_SESSION = True
+# Uncomment and set to enable TLS
+#MQTT_CA_CERT_PATH  = /etc/ssl/certs/relevant_ca.pem
 
 MQTT_TOPIC         = /mqtt-gpio-monitor
 MQTT_LWT           = /clients/mqtt-gpio-monitor
