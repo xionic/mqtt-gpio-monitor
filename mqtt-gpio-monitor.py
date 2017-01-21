@@ -243,40 +243,45 @@ def cleanup(signum, frame):
 
 
 def connect():
-	"""
-	Connect to the broker, define the callbacks, and subscribe
-	This will also set the Last Will and Testament (LWT)
-	The LWT will be published in the event of an unclean or
-	unexpected disconnection.
-	"""
-	# Add the callbacks
-	mqttc.on_connect = on_connect
-	mqttc.on_disconnect = on_disconnect
-	mqttc.on_message = on_message
+    """
+    Connect to the broker, define the callbacks, and subscribe
+    This will also set the Last Will and Testament (LWT)
+    The LWT will be published in the event of an unclean or
+    unexpected disconnection.
+    """
+    # Add the callbacks
+    mqttc.on_connect = on_connect
+    mqttc.on_disconnect = on_disconnect
+    mqttc.on_message = on_message
 
-	#Set the TLS settings
-	if MQTT_CA_CERT_PATH:
-		import ssl
-		logging.debug("trying to log ca certificates from " + MQTT_CA_CERT_PATH)
-		mqttc.tls_set(ca_certs=MQTT_CA_CERT_PATH, tls_version=ssl.PROTOCOL_TLSv1_2)
+    #Set the TLS settings
+    if MQTT_CA_CERT_PATH:
+	import ssl
+        logging.debug("trying to load ca certificates from " + MQTT_CA_CERT_PATH)
+        mqttc.tls_set(ca_certs=MQTT_CA_CERT_PATH, tls_version=ssl.PROTOCOL_TLSv1_2)
 
-	# Set the login details
-	if MQTT_USERNAME:
-		mqttc.username_pw_set(MQTT_USERNAME, MQTT_PASSWORD)
+    # Set the login details
+    if MQTT_USERNAME:
+        mqttc.username_pw_set(MQTT_USERNAME, MQTT_PASSWORD)
 
-	# Set the Last Will and Testament (LWT) *before* connecting
-	mqttc.will_set(MQTT_LWT, payload="0", qos=0, retain=True)
+    # Set the Last Will and Testament (LWT) *before* connecting
+    mqttc.will_set(MQTT_LWT, payload="0", qos=0, retain=True)
 
-	# Attempt to connect
-	logging.debug("Connecting to %s:%d..." % (MQTT_HOST, MQTT_PORT))
-	try:
-		mqttc.connect(MQTT_HOST, MQTT_PORT, 60)
-	except Exception, e:
-		logging.error("Error connecting to %s:%d: %s" % (MQTT_HOST, MQTT_PORT, str(e)))
-		sys.exit(2)
+    # Attempt to connect - for resilience try a few times if we fail to connect
+    attempt_num = 1
+    while True:
+        logging.debug("Connecting to %s:%d (attempt #%d)..." % (MQTT_HOST, MQTT_PORT, attempt_num))
+        try:
+           mqttc.connect(MQTT_HOST, MQTT_PORT, 60)
+        except Exception, e:
+            logging.error("Error connecting to %s:%d: %s" % (MQTT_HOST, MQTT_PORT, str(e)))
+            if attempt_num > 4:
+                sys.exit(2)
+            time.sleep(5)
+	break
 
-	# Let the connection run forever
-	mqttc.loop_start()
+    # Let the connection run forever
+    mqttc.loop_start()
 
 
 def init_pfio():
