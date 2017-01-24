@@ -17,7 +17,9 @@ You will also need an MQTT client, in this case [Paho](https://pypi.python.org/p
 
     sudo pip install paho-mqtt
 
-You should now be ready to run the script. It will listen for incoming messages on {topic}/in/+ (where {topic} is specified in the INI file). The incoming messages need to arrive on {topic}/in/{pin} with a value of either 1 or 0. 
+You should now be ready to run the script. It will listen for incoming messages on {topic}/in/+ (where {topic} is specified in the INI file). The incoming messages need to arrive on {topic}/in/{pin} with a value of either 1 or 0. Alternativly, you can supply a sequence of pin value changes with pauses between them. The payload form is "0|1 delay 0|1 delay ..." e.g. "1 1000 0" would set the pin high, wait 1000ms then set it low.
+
+The script also supports setting up PWM on GPIO pins. To do this use the payload form "pwm frequency duty_cycle" e.g. "pwm 100 50"
 
 E.g. a message arriving on {topic}/in/3 with value 1 will set pin 3 to HIGH. 
 
